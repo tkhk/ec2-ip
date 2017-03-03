@@ -18,12 +18,15 @@ import (
 )
 
 var buf = bufio.NewWriter(os.Stdout)
-var is_public, is_all bool
+var is_public, is_all, with_name bool
+var region string
 
 func init() {
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	f.BoolVar(&is_public, "public", false, "output public ip")
-	//f.BoolVar(&is_all, "all", false, "output all state ec2 instances(default: ouly running)")
+	f.BoolVar(&with_name, "n", false, "output name and ip")
+	f.BoolVar(&is_all, "a", false, "output all state ec2 instances(default: ouly running)")
+	f.StringVar(&region, "r", "ap-northeast-1", "specify region(default: ap-northeast-1)")
 	f.Parse(os.Args[1:])
 	f.Parse(f.Args()[1:])
 }
@@ -38,7 +41,7 @@ func main() {
 
 	s, err := session.NewSession(
 		&aws.Config{
-			Region: aws.String("ap-northeast-1"),
+			Region: aws.String(region),
 			Credentials: credentials.NewSharedCredentials(
 				filepath.Join(usr.HomeDir, ".aws", "credentials"), profile),
 		},
@@ -49,14 +52,20 @@ func main() {
 
 	svc := ec2.New(s)
 
-	input := ec2.DescribeInstancesInput{
-		Filters: []*ec2.Filter{
-			&ec2.Filter{
-				Name:   aws.String("instance-state-name"),
-				Values: []*string{aws.String("running")},
-			},
-		},
+	filters := make([]*ec2.Filter, 1)
+	if is_all {
+		filters = nil
+	} else {
+		filters[0] = &ec2.Filter{
+			Name:   aws.String("instance-state-name"),
+			Values: []*string{aws.String("running")},
+		}
 	}
+
+	input := ec2.DescribeInstancesInput{
+		Filters: filters,
+	}
+
 	out, err := svc.DescribeInstances(&input)
 	if err != nil {
 		log.Fatal(err)
@@ -64,6 +73,7 @@ func main() {
 
 	var nameTag string
 	var ipAddress string
+	var output string
 	for _, r := range out.Reservations {
 		for _, i := range r.Instances {
 			for _, t := range i.Tags {
@@ -84,11 +94,14 @@ func main() {
 					ipAddress = *i.PrivateIpAddress
 				}
 			}
-			fmt.Fprintf(buf, fmt.Sprintf(
-				"%v, %v\n",
-				nameTag,
-				ipAddress,
-			))
+
+			output = fmt.Sprintf("%v, %v\n", nameTag, ipAddress)
+			if with_name {
+				output = fmt.Sprintf("%v %v\n", nameTag, ipAddress)
+			} else {
+				output = fmt.Sprintf("%v\n", ipAddress)
+			}
+			fmt.Fprintf(buf, output)
 		}
 	}
 	buf.Flush()
