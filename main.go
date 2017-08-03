@@ -21,17 +21,36 @@ var buf = bufio.NewWriter(os.Stdout)
 var is_public, is_all, simple bool
 var region string
 
+func usage() {
+	fmt.Fprintf(
+		os.Stderr,
+		`
+Usage of %s:
+	%s PROFILE [OPTIONS]
+	Options\n`,
+		os.Args[0],
+		os.Args[0])
+	flag.PrintDefaults()
+}
+
 func init() {
+	flag.Usage = usage
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 	f.BoolVar(&is_public, "public", false, "public ip")
 	f.BoolVar(&simple, "simple", false, "only ip")
 	f.BoolVar(&is_all, "a", false, "all state ec2 instances(default: ouly running)")
 	f.StringVar(&region, "r", "ap-northeast-1", "specify region(default: ap-northeast-1)")
 	f.Parse(os.Args[1:])
+	if len(f.Args()) < 1 {
+		fmt.Println("Error")
+		usage()
+		return
+	}
 	f.Parse(f.Args()[1:])
 }
 
 func main() {
+	fmt.Println(os.Args)
 	profile := os.Args[1]
 
 	usr, err := user.Current()
