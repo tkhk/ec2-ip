@@ -118,7 +118,7 @@ func main() {
 			if simple {
 				output = fmt.Sprintf("%v\n", ipAddress)
 			} else {
-				output = fmt.Sprintf("%v %v\n", nameTag, ipAddress)
+				output = fmt.Sprintf("%v %v %v\n", nameTag, ipAddress, *i.LaunchTime)
 			}
 			fmt.Fprintf(buf, output)
 		}
