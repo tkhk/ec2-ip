@@ -18,14 +18,14 @@ import (
 )
 
 var buf = bufio.NewWriter(os.Stdout)
-var is_public, is_all, with_name bool
+var is_public, is_all, simple bool
 var region string
 
 func init() {
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	f.BoolVar(&is_public, "public", false, "output public ip")
-	f.BoolVar(&with_name, "n", false, "output name and ip")
-	f.BoolVar(&is_all, "a", false, "output all state ec2 instances(default: ouly running)")
+	f.BoolVar(&is_public, "public", false, "public ip")
+	f.BoolVar(&simple, "simple", false, "only ip")
+	f.BoolVar(&is_all, "a", false, "all state ec2 instances(default: ouly running)")
 	f.StringVar(&region, "r", "ap-northeast-1", "specify region(default: ap-northeast-1)")
 	f.Parse(os.Args[1:])
 	f.Parse(f.Args()[1:])
@@ -96,10 +96,10 @@ func main() {
 			}
 
 			output = fmt.Sprintf("%v, %v\n", nameTag, ipAddress)
-			if with_name {
-				output = fmt.Sprintf("%v %v\n", nameTag, ipAddress)
-			} else {
+			if simple {
 				output = fmt.Sprintf("%v\n", ipAddress)
+			} else {
+				output = fmt.Sprintf("%v %v\n", nameTag, ipAddress)
 			}
 			fmt.Fprintf(buf, output)
 		}

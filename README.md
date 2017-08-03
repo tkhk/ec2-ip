@@ -1,2 +1,2 @@
-# gather-ec2-ip
-Only listing ec2 instance ips.
+# ec2-ip
+only listing ec2 instance ips.

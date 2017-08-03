@@ -1,0 +1,32 @@
+{
+    "memo": "7da27ecda62697bcf3b4298fd160504d4e12fe8bf336110393cb9efcfe0cb865",
+    "projects": [
+        {
+            "name": "github.com/aws/aws-sdk-go",
+            "branch": "master",
+            "revision": "7ed8f25dbafe291a15d1a1cf89dcd159d5bd2e3f",
+            "packages": [
+                "aws",
+                "aws/credentials",
+                "aws/session",
+                "service/ec2"
+            ]
+        },
+        {
+            "name": "github.com/go-ini/ini",
+            "version": "v1.28.0",
+            "revision": "d3de07a94d22b4a0972deb4b96d790c2c0ce8333",
+            "packages": [
+                "."
+            ]
+        },
+        {
+            "name": "github.com/jmespath/go-jmespath",
+            "version": "0.2.2",
+            "revision": "3433f3ea46d9f8019119e7dd41274e112a2359a9",
+            "packages": [
+                "."
+            ]
+        }
+    ]
+}
