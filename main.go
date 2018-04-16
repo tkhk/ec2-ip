@@ -3,22 +3,18 @@ package main
 import (
 	"log"
 
-	"os/user"
-	"path/filepath"
-
 	"bufio"
 	"flag"
 	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
 var buf = bufio.NewWriter(os.Stdout)
-var is_public, is_all, simple bool
+var isPublic, isAll, simple bool
 var region string
 
 func usage() {
@@ -36,9 +32,9 @@ Usage of %s:
 func init() {
 	flag.Usage = usage
 	f := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
-	f.BoolVar(&is_public, "public", false, "public ip")
+	f.BoolVar(&isPublic, "public", false, "public ip")
 	f.BoolVar(&simple, "simple", false, "only ip")
-	f.BoolVar(&is_all, "a", false, "all state ec2 instances(default: ouly running)")
+	f.BoolVar(&isAll, "a", false, "all state ec2 instances(default: ouly running)")
 	f.StringVar(&region, "r", "ap-northeast-1", "specify region(default: ap-northeast-1)")
 	f.Parse(os.Args[1:])
 	if len(f.Args()) < 1 {
@@ -53,26 +49,10 @@ func main() {
 	fmt.Println(os.Args)
 	profile := os.Args[1]
 
-	usr, err := user.Current()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	s, err := session.NewSession(
-		&aws.Config{
-			Region: aws.String(region),
-			Credentials: credentials.NewSharedCredentials(
-				filepath.Join(usr.HomeDir, ".aws", "credentials"), profile),
-		},
-	)
-	if err != nil {
-		log.Fatal("Could not get session: %v", err)
-	}
-
-	svc := ec2.New(s)
+	svc := ec2.New(session.Must(session.NewSession()))
 
 	filters := make([]*ec2.Filter, 1)
-	if is_all {
+	if isAll {
 		filters = nil
 	} else {
 		filters[0] = &ec2.Filter{
@@ -104,7 +84,7 @@ func main() {
 			}
 
 			ipAddress = ""
-			if is_public {
+			if isPublic {
 				if i.PublicIpAddress != nil {
 					ipAddress = *i.PublicIpAddress
 				}
