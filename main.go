@@ -46,10 +46,16 @@ func init() {
 }
 
 func main() {
-	fmt.Println(os.Args)
+
 	profile := os.Args[1]
 
-	svc := ec2.New(session.Must(session.NewSession()))
+	svc := ec2.New(session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+		Profile:           profile,
+		Config: aws.Config{
+			Region: &region,
+		},
+	})))
 
 	filters := make([]*ec2.Filter, 1)
 	if isAll {
